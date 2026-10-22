@@ -505,6 +505,7 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
 
   <!-- 香炉 -->
   <g class="obj" id="o-incense" data-step="1">
+    <rect x="466" y="384" width="68" height="104" fill="none" pointer-events="all"/>
     <g id="sticks">
       <path d="M488 452 v-46 M500 452 v-56 M512 452 v-46" stroke="#c9b08a" stroke-width="1.6" fill="none"/>
       <circle cx="488" cy="406" r="2.4" fill="#ff8a3d"/>
@@ -591,15 +592,15 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
    每节带：编号、动作、引文、出处、释读、前置约束。
    ========================================================= */
 var STEPS=[
-  {id:"place",  key:"设位", lab:"一 · 设 位", act:"立位",
+  {id:"place",  key:"设位", lab:"一 · 设 位", act:"立位", delay:1400,
    q:"祭之日，入室，僾然必有见乎其位。",
    s:"《礼记 · 祭义》",
    g:"先立其位，才有可祭之人。"},
-  {id:"incense",key:"迎神", lab:"二 · 迎 神", act:"燃香",
+  {id:"incense",key:"迎神", lab:"二 · 迎 神", act:"燃香", delay:1100,
    q:"祭如在，祭神如神在。",
    s:"《论语 · 八佾》",
    g:"三炷香起，谓之降神。"},
-  {id:"pour",   key:"三献", lab:"三 · 三 献", act:"奠酒",
+  {id:"pour",   key:"三献", lab:"三 · 三 献", act:"奠酒", delay:0,
    q:"初献 · 亚献 · 终献",
    s:"《朱子家礼》卷五《祭礼》",
    g:"一献、再献、三献，礼成于三。"},
@@ -607,7 +608,7 @@ var STEPS=[
    q:"春，雨露既濡，君子履之，必有怵惕之心。",
    s:"《礼记 · 祭义》",
    g:"读到这一句，才有话可说。家礼：读祝在初献之后；此以三献为一节，故列于其后。"},
-  {id:"offer",  key:"侑食", lab:"五 · 侑 食", act:"进馔",
+  {id:"offer",  key:"侑食", lab:"五 · 侑 食", act:"进馔", delay:1600,
    q:"侑食",
    s:"《朱子家礼》卷五《祭礼》",
    g:"劝食——人间的饭，也端给他一碗。"},
@@ -615,7 +616,7 @@ var STEPS=[
    q:"阖门 · 启门",
    s:"《朱子家礼》卷五《祭礼》",
    g:"阖门以食：把门合上，让祖先独自用饭；移时启门。"},
-  {id:"burn",   key:"辞神", lab:"七 · 辞 神", act:"焚帛",
+  {id:"burn",   key:"辞神", lab:"七 · 辞 神", act:"焚帛", delay:1100,
    q:"辞神 · 纳主 · 彻",
    s:"《朱子家礼》卷五《祭礼》",
    g:"火灭，位收，祭毕。"}
@@ -997,12 +998,18 @@ var actions={
 
 function doCurrent(){
   if(done||busy) return;
-  var act=STEPS[idx] && STEPS[idx].id;
-  if(!act||!actions[act]) return;
+  var step=STEPS[idx];
+  if(!step||!actions[step.id]) return;
   ctxAudio();
-  var r=actions[act]();
+  var r=actions[step.id]();
   if(r===false) return;
-  advance();
+  var d=step.delay||0;
+  if(d>0){
+    busy=true;
+    setTimeout(function(){ busy=false; advance(); },d);
+  }else{
+    advance();
+  }
 }
 
 function clickObj(o){
