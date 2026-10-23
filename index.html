@@ -909,6 +909,98 @@ function bell(freq,dur,gain,partials){
 }
 
 /* =========================================================
+   三 · 背景音：房间底噪 + 低频持续音 + 稀疏琴音
+   同样全部实时合成，不加载任何音频文件。
+   羽调五声（D F G A C）——祭礼宜用羽声。
+   ========================================================= */
+var musicBus=null, musicOn=false, pluckTimer=null, pluckCount=0;
+var PENTA=[146.83,174.61,196.00,220.00,261.63,293.66,349.23];
+
+function pluck(freq,dur,gain){
+  var c=AC; if(!c) return;
+  var t=c.currentTime+0.01;
+  pluckCount++;
+
+  var env=c.createGain();
+  env.gain.setValueAtTime(0.0001,t);
+  env.gain.exponentialRampToValueAtTime(gain,t+0.014);
+  env.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+
+  var lp=c.createBiquadFilter();
+  lp.type="lowpass"; lp.frequency.value=Math.min(freq*5,2600); lp.Q.value=0.5;
+  env.connect(lp); lp.connect(musicBus);
+
+  var detune=(Math.random()-0.5)*0.006;
+  [[1,1,"triangle"],[2,0.32,"sine"],[3,0.1,"sine"]].forEach(function(h){
+    var o=c.createOscillator(), og=c.createGain();
+    o.type=h[2];
+    o.frequency.value=freq*h[0]*(1+detune);
+    og.gain.value=h[1];
+    o.connect(og); og.connect(env);
+    o.start(t); o.stop(t+dur+0.15);
+  });
+}
+
+function schedulePluck(){
+  if(!musicOn) return;
+  var step=PENTA[Math.floor(Math.random()*PENTA.length)];
+  var oct=Math.random()<0.35?0.5:1;
+  pluck(step*oct, 3.2+Math.random()*2.6, 0.042+Math.random()*0.032);
+  pluckTimer=setTimeout(schedulePluck, 4200+Math.random()*5200);
+}
+
+function startAmbience(){
+  var c=ctxAudio(); if(!c||musicOn) return;
+  musicOn=true;
+
+  musicBus=c.createGain();
+  musicBus.gain.value=0.0001;
+  musicBus.connect(master);
+  musicBus.gain.exponentialRampToValueAtTime(1, c.currentTime+4);
+
+  /* 房间底噪：低通过的棕噪，像空气 */
+  var len=Math.floor(c.sampleRate*4);
+  var buf=c.createBuffer(1,len,c.sampleRate);
+  var d=buf.getChannelData(0), last=0;
+  for(var i=0;i<len;i++){
+    var w=Math.random()*2-1;
+    last=(last+0.018*w)/1.018;
+    d[i]=last*3.2;
+  }
+  var src=c.createBufferSource();
+  src.buffer=buf; src.loop=true;
+  var lp=c.createBiquadFilter();
+  lp.type="lowpass"; lp.frequency.value=300; lp.Q.value=0.3;
+  var ng=c.createGain(); ng.gain.value=0.017;
+  src.connect(lp); lp.connect(ng); ng.connect(musicBus);
+  src.start();
+
+  /* 持续音：宫（D）与徵（A），各自缓慢呼吸 */
+  [[73.42,0.034],[110.00,0.019]].forEach(function(p){
+    var o=c.createOscillator(), g=c.createGain();
+    o.type="sine"; o.frequency.value=p[0];
+    g.gain.value=p[1];
+    var lfo=c.createOscillator(), lg=c.createGain();
+    lfo.frequency.value=0.045+Math.random()*0.035;
+    lg.gain.value=p[1]*0.5;
+    lfo.connect(lg); lg.connect(g.gain);
+    o.connect(g); g.connect(musicBus);
+    o.start(); lfo.start();
+  });
+
+  setTimeout(function(){ pluck(PENTA[0],4.5,0.055); },1200);
+  schedulePluck();
+}
+
+function stopAmbience(){
+  musicOn=false;
+  if(pluckTimer){ clearTimeout(pluckTimer); pluckTimer=null; }
+  if(musicBus){
+    try{ musicBus.gain.cancelScheduledValues(AC.currentTime); musicBus.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime+0.8); }catch(e){}
+  }
+}
+
+/* =========================================================
    三 · Canvas 粒子：香烟 / 蒸汽 / 纸灰 / 浮尘
    单循环，按 kind 分流。
    ========================================================= */
@@ -1456,6 +1548,7 @@ function enterRitual(){
   if(entered) return;
   entered=true;
   ctxAudio();
+  startAmbience();
   bell(131,3.8,.16,[1,2,3,4.2]);
   coverEl.classList.add("out");
   covLbl.textContent="禁　火";
@@ -1502,6 +1595,26 @@ window.__do=function(){
 };
 window.__jump=function(i){ busy=false; idx=i; render(); };
 window.__poster=makePoster;
+window.__music=function(){ return { on:musicOn, plucks:pluckCount, ctx:!!AC, state:AC&&AC.state }; };
+window.__level=function(ms){
+  if(!AC||!master) return Promise.resolve(null);
+  var an=AC.createAnalyser(); an.fftSize=2048;
+  master.connect(an);
+  var buf=new Float32Array(an.fftSize);
+  var peak=0,sumsq=0,n=0,t0=performance.now();
+  return new Promise(function(res){
+    (function tick(){
+      an.getFloatTimeDomainData(buf);
+      for(var i=0;i<buf.length;i++){
+        var v=buf[i];
+        if(Math.abs(v)>peak) peak=Math.abs(v);
+        sumsq+=v*v; n++;
+      }
+      if(performance.now()-t0<ms) requestAnimationFrame(tick);
+      else { try{master.disconnect(an);}catch(e){} res({rms:Math.sqrt(sumsq/n),peak:peak}); }
+    })();
+  });
+};
 })();
 </script>
 </body>
