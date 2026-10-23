@@ -335,6 +335,93 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
   padding:.7em 1.6em;cursor:pointer;transition:color .35s,border-color .35s,background .35s;
 }
 .end button:hover{color:#f7edd8;border-color:rgba(192,57,43,.7);background:rgba(192,57,43,.12)}
+
+/* ================= 竖屏 / 小屏 ================= */
+@media (max-aspect-ratio: 1/1), (max-width: 760px){
+
+  /* —— 封面 —— */
+  .cover .cglow{width:130vw;height:130vw;bottom:12%}
+  .cover .bowl{width:76vw;bottom:27%}
+  .cov-h{
+    writing-mode:horizontal-tb;white-space:nowrap;text-indent:.3em;
+    left:0;right:0;top:calc(8vh + env(safe-area-inset-top));transform:none;
+    text-align:center;
+    font-size:clamp(24px,7.6vw,44px);letter-spacing:.3em;
+  }
+  .cov-q{left:7vw;right:7vw;bottom:13vh;max-width:none}
+  .cov-q .q{font-size:clamp(14px,4vw,18px);line-height:1.85}
+  .cov-q .s{font-size:10px}
+  .cov-hint{bottom:calc(5vh + env(safe-area-inset-bottom));font-size:11px;letter-spacing:.34em}
+
+  /* —— 祭桌 —— */
+  .scene{
+    width:126vw;max-width:none;
+    top:42%;transform:translate(-50%,-50%);
+    filter:drop-shadow(0 24px 40px rgba(0,0,0,.9));
+  }
+  /* SVG 内部字号跟着放大，否则手机上只有 8px */
+  .scene .hint{font-size:38px;letter-spacing:.2em}
+  .scene .tab{font-size:36px}
+
+  /* —— 引文移到桌面下方 —— */
+  .quote{
+    left:6vw;right:6vw;top:auto;max-width:none;
+    bottom:calc(15vh + env(safe-area-inset-bottom));
+  }
+  .quote .lbl{font-size:10px;letter-spacing:.26em;margin-bottom:7px}
+  .quote .q{font-size:clamp(14px,4vw,18px);line-height:1.85;padding-left:12px}
+  .quote .s{font-size:10px;margin-top:8px;padding-left:14px}
+  .quote .g{font-size:11.5px;line-height:1.8;margin-top:9px;padding-left:14px}
+
+  /* —— 礼序 —— */
+  .order{right:6vw;bottom:calc(5.5vh + env(safe-area-inset-bottom));gap:7px}
+  .order .marks{gap:7px}
+  .order .marks i{width:13px}
+  .order .marks i.now{width:22px}
+  .order .lab{font-size:9px;letter-spacing:.26em}
+
+  .kicker{left:6vw;top:calc(2.6vh + env(safe-area-inset-top));font-size:8.5px;letter-spacing:.3em}
+  .sound{right:5vw;top:calc(2.2vh + env(safe-area-inset-top));font-size:10px;letter-spacing:.16em;padding:.4em .7em}
+
+  /* —— 读祝表单：改竖排 —— */
+  .zform{
+    flex-direction:column;align-items:stretch;gap:14px;
+    width:78vw;top:36%;padding:20px 22px;
+  }
+  .zform label{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;font-size:10px}
+  .zform input{width:58%;text-align:left;font-size:15px}
+  .zform button{align-self:stretch;padding:.75em}
+
+  /* —— 祝文 —— */
+  .zscroll{
+    right:8vw;max-height:58vh;
+    font-size:clamp(12px,3.5vw,16px);line-height:1.85;letter-spacing:.08em;
+  }
+
+  /* —— 阖门 —— */
+  .dtip{font-size:12px;letter-spacing:.3em;bottom:calc(4vh + env(safe-area-inset-bottom))}
+  .toast{font-size:12px;letter-spacing:.26em;bottom:32vh;padding:.55em 1.1em}
+
+  /* —— 落幅 —— */
+  .end{padding-top:calc(8vh + env(safe-area-inset-top))}
+  .end h1{font-size:clamp(30px,8.4vw,50px);letter-spacing:.24em;margin-bottom:10px}
+  .end .eq{font-size:clamp(12px,3.5vw,15px);padding:0 9vw;line-height:1.9}
+  .end .es{font-size:10px}
+  .end-acts{flex-direction:column;width:66vw;gap:10px;margin-top:20px}
+  .end button{width:100%;margin-top:0;font-size:12px;padding:.85em}
+  .finale .bowl{width:62vw;bottom:-9%}
+  .finale .fglow{width:150vw;height:70vw}
+  .ftag{left:6vw;bottom:calc(2vh + env(safe-area-inset-bottom));font-size:10px}
+}
+
+/* 横屏手机：只压字号，不动版式 */
+@media (max-height: 460px) and (min-aspect-ratio: 1/1){
+  .quote{bottom:6vh;max-width:min(36vw,300px)}
+  .quote .q{font-size:13px}
+  .quote .g{font-size:10.5px}
+  .order{bottom:5vh}
+  .scene{width:min(900px,72vw)}
+}
 </style>
 </head>
 <body>
@@ -595,6 +682,7 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
 
   <!-- 帛 -->
   <g class="obj" id="o-burn" data-step="6">
+    <rect x="250" y="398" width="100" height="98" fill="none" pointer-events="all"/>
     <g id="silk">
       <!-- 下层 -->
       <path d="M274 452 h52 v18 h-52 z" fill="#bfae8b"/>
@@ -609,6 +697,7 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
 
   <!-- 食罩 -->
   <g class="obj" id="o-offer" data-step="4">
+    <rect x="346" y="400" width="128" height="88" fill="none" pointer-events="all"/>
     <g id="dish">
       <ellipse cx="410" cy="466" rx="33" ry="7" fill="#7d6a4d"/>
       <ellipse cx="410" cy="463" rx="27" ry="5.5" fill="#c9b08a"/>
@@ -635,7 +724,7 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
 
   <!-- 香炉 -->
   <g class="obj" id="o-incense" data-step="1">
-    <rect x="466" y="384" width="68" height="104" fill="none" pointer-events="all"/>
+    <rect x="450" y="384" width="100" height="104" fill="none" pointer-events="all"/>
     <g id="sticks">
       <path d="M488 452 v-46 M500 452 v-56 M512 452 v-46" stroke="#c9b08a" stroke-width="1.4" fill="none"/>
       <circle cx="488" cy="406" r="2.6" fill="#ff8a3d"/>
@@ -662,6 +751,7 @@ body.shut .dtip{opacity:.55;animation:none;letter-spacing:.5em}
 
   <!-- 爵 -->
   <g class="obj" id="o-pour" data-step="2">
+    <rect x="556" y="394" width="110" height="100" fill="none" pointer-events="all"/>
     <!-- 鋬（把手） -->
     <path d="M632 437 q13 5 8 16" fill="none" stroke="url(#bronzeRim)" stroke-width="3" stroke-linecap="round"/>
     <!-- 流（壶嘴） -->
